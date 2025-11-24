@@ -4,7 +4,7 @@ import os
 from github import Github, RateLimitExceededException
 
 # --- CONFIGURAÇÃO ---
-GITHUB_TOKEN = "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" 
+GITHUB_TOKEN = "" 
 REPO_NAME = "yonaskolb/XcodeGen"
 PASTA_SAIDA = "dados_coletados" 
 
