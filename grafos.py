@@ -1,8 +1,5 @@
 from abc import ABC, abstractmethod
 
-# ------------------------------------------------------------------
-# CLASSE ABSTRATA (MODELO OBRIGATÓRIO)
-# ------------------------------------------------------------------
 class AbstractGraph(ABC):
     def __init__(self, num_vertices):
         self.num_vertices = num_vertices
@@ -21,7 +18,7 @@ class AbstractGraph(ABC):
             return self.vertex_weights[v]
         return 0.0
 
-    # --- MÉTODOS ABSTRATOS (API OBRIGATÓRIA) ---
+    # --- MÉTODOS ABSTRATOS ---
     @abstractmethod
     def add_edge(self, u, v, weight=1.0): pass
 
@@ -79,14 +76,6 @@ class AbstractGraph(ABC):
     @abstractmethod
     def is_connected(self): pass
     
-    # O método abstrato para exportação é opcional na classe pai, 
-    # mas obrigatório na implementação segundo o enunciado. 
-    # Vamos defini-lo na AdjacencyListGraph.
-
-
-# ------------------------------------------------------------------
-# IMPLEMENTAÇÃO 1: MATRIZ DE ADJACÊNCIA (Melhor para grafos densos)
-# ------------------------------------------------------------------
 class AdjacencyMatrixGraph(AbstractGraph):
     def __init__(self, num_vertices):
         super().__init__(num_vertices)
@@ -159,10 +148,6 @@ class AdjacencyMatrixGraph(AbstractGraph):
                     
         return count_visited == self.num_vertices
 
-
-# ------------------------------------------------------------------
-# IMPLEMENTAÇÃO 2: LISTA DE ADJACÊNCIA (Melhor para grafos esparsos - SEU CASO)
-# ------------------------------------------------------------------
 class AdjacencyListGraph(AbstractGraph):
     def __init__(self, num_vertices):
         super().__init__(num_vertices)
@@ -258,7 +243,6 @@ class AdjacencyListGraph(AbstractGraph):
                             
         return count_visited == self.num_vertices
 
-    # --- MÉTODO OBRIGATÓRIO PARA O RELATÓRIO E AVALIAÇÃO ---
     def export_to_gephi(self, path_arquivo):
         print(f"--- Exportando grafo para: {path_arquivo} ---")
         try:

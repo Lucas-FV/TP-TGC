@@ -16,7 +16,6 @@ def carregar_grafo(caminho_arquivo, indice_peso):
         print(f"ERRO: Arquivo não encontrado: {caminho_arquivo}")
         return None, None
 
-    # 1. PRIMEIRA PASSADA: Identificar todos os vértices (usuários) únicos
     usuarios = set()
     with open(caminho_arquivo, 'r', encoding='utf-8') as f:
         leitor = csv.reader(f)
@@ -27,7 +26,6 @@ def carregar_grafo(caminho_arquivo, indice_peso):
                 usuarios.add(linha[0])
                 usuarios.add(linha[1])
     
-    # Ordenar para garantir que o ID 0 seja sempre o mesmo usuário em execuções diferentes
     lista_usuarios = sorted(list(usuarios))
     num_vertices = len(lista_usuarios)
     print(f"Total de Vértices detectados: {num_vertices}")
