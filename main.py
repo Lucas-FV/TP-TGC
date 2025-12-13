@@ -45,18 +45,25 @@ def carregar_grafo(caminho_arquivo, indice_peso):
 # --- MENU DE MÉTRICAS (Sub-menu) ---
 def menu_metricas(grafo, nome_grafo):
     while True:
+        # Tenta calcular a densidade para mostrar no cabeçalho (rápido)
+        try:
+            densidade_info = f"{grafo.calcular_densidade():.6f}"
+        except:
+            densidade_info = "N/A"
+
         print(f"\n==============================================")
         print(f"GRAFO SELECIONADO: {nome_grafo}")
         print(f"----------------------------------------------")
         # Informações Básicas
         print(f"  > Total Vértices: {grafo.get_vertex_count()}")
         print(f"  > Total Arestas:  {grafo.get_edge_count()}")
+        print(f"  > Densidade:      {densidade_info}")
         print(f"==============================================")
         print("Escolha uma métrica para calcular:")
-        print("1. Grau Médio Ponderado por Conectividade Efetiva")
-        print("2. Índice de Robustez por Redundância de Caminhos")
-        print("3. Coeficiente de Proximidade Estrutural Global")
-        print("4. Exportar para Gephi (.gexf)")
+        print("1. Grau Médio Ponderado por Conectividade Efetiva (GMCE)")
+        print("2. Coeficiente de Proximidade Estrutural Global (Dijkstra)")
+        print("3. Taxa de Reciprocidade (Colaboração Mútua)")
+        print("4. Densidade da Rede (Detalhada)")
         print("0. Voltar ao Menu Principal")
         print("----------------------------------------------")
         
@@ -67,33 +74,46 @@ def menu_metricas(grafo, nome_grafo):
             try:
                 resultado = grafo.calcular_gmce()
                 print(f">>> Resultado GMCE: {resultado:.6f}")
+                print("Interpretação: Indica a conectividade média considerando o peso das interações.")
             except AttributeError:
                 print("ERRO: Método 'calcular_gmce' não encontrado em grafos.py")
             input("\nPressione Enter para continuar...")
 
         elif opcao == '2':
-            print("\n--- Calculando Índice de Robustez (IRRC)... ---")
-            print("(Esta métrica ainda será implementada na classe AbstractGraph)")
-            # Quando implementar, descomente abaixo:
-            # resultado = grafo.calcular_indice_robustez()
-            # print(f">>> Resultado Robustez: {resultado:.6f}")
-            input("\nPressione Enter para continuar...")
-
-        elif opcao == '3':
             print("\n--- Calculando Coeficiente de Proximidade (Dijkstra)... ---")
-            print("Aviso: Isso pode levar alguns segundos dependendo do tamanho do grafo.")
+            print("Aviso: Isso pode levar alguns instantes (algoritmo complexo).")
             try:
                 resultado = grafo.calcular_coeficiente_proximidade()
                 print(f">>> Resultado Proximidade Global: {resultado:.6f}")
+                print("Interpretação: Média de quão perto (em passos) cada nó está de todos os outros.")
             except AttributeError:
                 print("ERRO: Método 'calcular_coeficiente_proximidade' não encontrado em grafos.py")
             input("\nPressione Enter para continuar...")
 
+        elif opcao == '3':
+            print("\n--- Calculando Taxa de Reciprocidade... ---")
+            try:
+                resultado = grafo.calcular_reciprocidade()
+                print(f">>> Resultado Reciprocidade: {resultado:.2%}")
+                if resultado < 0.3:
+                    print("Interpretação: Baixa reciprocidade (Hierarquia ou Suporte).")
+                else:
+                    print("Interpretação: Alta reciprocidade (Equipe Colaborativa).")
+            except AttributeError:
+                print("ERRO: Método 'calcular_reciprocidade' não encontrado em grafos.py")
+            input("\nPressione Enter para continuar...")
+        
         elif opcao == '4':
-            # Gera um nome de arquivo baseado no nome do grafo (ex: gephi_export_Comentários.gexf)
-            safe_name = nome_grafo.split()[2].replace("(", "").replace(")", "")
-            nome_arquivo = f"gephi_export_{safe_name}.gexf"
-            grafo.export_to_gephi(nome_arquivo)
+            print("\n--- Calculando Densidade da Rede... ---")
+            try:
+                resultado = grafo.calcular_densidade()
+                print(f">>> Resultado Densidade: {resultado:.8f}")
+                if resultado < 0.05:
+                    print("Interpretação: Rede Esparsa (Típico de Open Source).")
+                else:
+                    print("Interpretação: Rede Densa.")
+            except AttributeError:
+                print("ERRO: Método 'calcular_densidade' não encontrado em grafos.py")
             input("\nPressione Enter para continuar...")
 
         elif opcao == '0':
