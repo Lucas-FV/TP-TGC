@@ -3,7 +3,7 @@ import os
 import sys
 from grafos import AdjacencyListGraph
 
-# --- FUNÇÃO DE CARREGAMENTO (Mantida igual) ---
+# --- FUNÇÃO DE CARREGAMENTO ---
 def carregar_grafo(caminho_arquivo, indice_peso):
     if not os.path.exists(caminho_arquivo):
         print(f"ERRO: Arquivo não encontrado: {caminho_arquivo}")
@@ -48,7 +48,7 @@ def menu_metricas(grafo, nome_grafo):
         print(f"\n==============================================")
         print(f"GRAFO SELECIONADO: {nome_grafo}")
         print(f"----------------------------------------------")
-        # Informações Básicas (Sempre mostradas)
+        # Informações Básicas
         print(f"  > Total Vértices: {grafo.get_vertex_count()}")
         print(f"  > Total Arestas:  {grafo.get_edge_count()}")
         print(f"==============================================")
@@ -64,30 +64,40 @@ def menu_metricas(grafo, nome_grafo):
 
         if opcao == '1':
             print("\n--- Calculando Grau Médio Ponderado (GMCE)... ---")
-            resultado = grafo.calcular_gmce()
-            print(f"Resultado GMCE: {resultado:.4f}")
+            try:
+                resultado = grafo.calcular_gmce()
+                print(f">>> Resultado GMCE: {resultado:.6f}")
+            except AttributeError:
+                print("ERRO: Método 'calcular_gmce' não encontrado em grafos.py")
             input("\nPressione Enter para continuar...")
 
         elif opcao == '2':
             print("\n--- Calculando Índice de Robustez (IRRC)... ---")
-            # print(f"Resultado: {resultado}")
             print("(Esta métrica ainda será implementada na classe AbstractGraph)")
+            # Quando implementar, descomente abaixo:
+            # resultado = grafo.calcular_indice_robustez()
+            # print(f">>> Resultado Robustez: {resultado:.6f}")
             input("\nPressione Enter para continuar...")
 
         elif opcao == '3':
-            print("\n--- Calculando Coeficiente de Proximidade... ---")
-            # FUTURO: resultado = grafo.calcular_coeficiente_proximidade()
-            # print(f"Resultado: {resultado}")
-            print("(Esta métrica ainda será implementada na classe AbstractGraph)")
+            print("\n--- Calculando Coeficiente de Proximidade (Dijkstra)... ---")
+            print("Aviso: Isso pode levar alguns segundos dependendo do tamanho do grafo.")
+            try:
+                resultado = grafo.calcular_coeficiente_proximidade()
+                print(f">>> Resultado Proximidade Global: {resultado:.6f}")
+            except AttributeError:
+                print("ERRO: Método 'calcular_coeficiente_proximidade' não encontrado em grafos.py")
             input("\nPressione Enter para continuar...")
 
         elif opcao == '4':
-            nome_arquivo = f"gephi_export_{nome_grafo.split()[1]}.gexf"
+            # Gera um nome de arquivo baseado no nome do grafo (ex: gephi_export_Comentários.gexf)
+            safe_name = nome_grafo.split()[2].replace("(", "").replace(")", "")
+            nome_arquivo = f"gephi_export_{safe_name}.gexf"
             grafo.export_to_gephi(nome_arquivo)
             input("\nPressione Enter para continuar...")
 
         elif opcao == '0':
-            break # Sai do loop de métricas e volta pro menu principal
+            break 
         else:
             print("Opção inválida!")
 
@@ -97,18 +107,17 @@ def main():
     print("\n--- INICIALIZANDO SISTEMA ---")
     print("Carregando grafos na memória, aguarde...")
 
-    # Carrega tudo de uma vez para não ter delay no menu
     g1 = carregar_grafo(os.path.join(pasta, "grafo_1_comentarios.csv"), indice_peso=3)
     g2 = carregar_grafo(os.path.join(pasta, "grafo_2_fechamentos.csv"), indice_peso=2)
     g3 = carregar_grafo(os.path.join(pasta, "grafo_3_pr_reviews.csv"), indice_peso=3)
     
     if not g1 or not g2 or not g3:
         print("ERRO CRÍTICO: Não foi possível carregar os arquivos CSV.")
-        print("Verifique se rodou o 'coleta.py' primeiro.")
+        print("Verifique se a pasta 'dados_coletados' existe e se rodou o 'coleta.py'.")
         return
 
     while True:
-        os.system('cls' if os.name == 'nt' else 'clear') # Limpa tela (opcional)
+        os.system('cls' if os.name == 'nt' else 'clear') 
         print(f"\n==============================================")
         print(f"      ANÁLISE DE REDES - XCODEGEN")
         print(f"==============================================")

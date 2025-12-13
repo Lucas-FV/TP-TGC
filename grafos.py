@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import heapq
 
 # ------------------------------------------------------------------
 # CLASSE ABSTRATA (MODELO OBRIGATÓRIO)
@@ -232,10 +233,9 @@ class AdjacencyListGraph(AbstractGraph):
     
     # ====================================================================
     #      ### ÁREA PARA IMPLEMENTAR SUAS MÉTRICAS (ETAPA 3) ###
-    #      Quando você decidir qual métrica usar (Densidade, etc),
-    #      escreva o método aqui na classe abstrata e implemente nas filhas
-    #      ou deixe aqui se a lógica for genérica.
     # ====================================================================
+
+    # --- Métrica 1: Cálculo do Grau Médio (GMCE) ---
     def calcular_gmce(self):
         n = self.num_vertices
         if n == 0:
@@ -249,25 +249,84 @@ class AdjacencyListGraph(AbstractGraph):
 
         for u in range(n):
             grau_u = graus[u]
-
             if grau_u == 0:
                 continue
 
             soma_graus_vizinhos = 0.0
             
-            for v in range(n):
-                if self.has_edge(u, v):
-                    soma_graus_vizinhos += graus[v]
+            # Otimização: Iterar sobre a lista de adjacência
+            for aresta in self.adj_list[u]:
+                v = aresta[0] # [vizinho, peso]
+                soma_graus_vizinhos += graus[v]
 
             media_vizinhos = soma_graus_vizinhos / grau_u
             valor_conectividade_u = grau_u * media_vizinhos
             soma_total_metricas += valor_conectividade_u
 
         gmce = soma_total_metricas / n
-        
         return gmce
+        
+    # --- Métrica 2: Coeficiente de Proximidade (Usando DIJKSTRA) ---
+    def _dijkstra(self, start_node):
+        distancias = {i: float('inf') for i in range(self.num_vertices)}
+        distancias[start_node] = 0
+            
+        pq = [(0, start_node)]
 
-    # --- EXPORTAÇÃO GEPHI (OBRIGATÓRIO PELO ENUNCIADO) ---
+        while pq:
+            dist_atual, u = heapq.heappop(pq)
+
+            if dist_atual > distancias[u]:
+                continue
+
+            for aresta in self.adj_list[u]:
+                v = aresta[0]
+                peso = aresta[1]
+                    
+                # Aqui o peso é usado como distância (Custo)
+                nova_dist = dist_atual + peso
+
+                if nova_dist < distancias[v]:
+                    distancias[v] = nova_dist
+                    heapq.heappush(pq, (nova_dist, v))
+            
+        return distancias
+
+    def calcular_coeficiente_proximidade(self):
+        n = self.num_vertices
+        if n == 0: return 0.0
+
+        soma_proximidades = 0.0
+        nos_processados = 0
+
+        print(f"   > Iniciando cálculo de Dijkstra para {n} nós...")
+            
+        for i in range(n):
+            if i % 100 == 0: print(f"     Processando nó {i}/{n}...")
+
+            distancias = self._dijkstra(i)
+                
+            soma_distancias = 0
+            contagem_alcancaveis = 0
+                
+            for d in distancias.values():
+                if d != float('inf') and d > 0:
+                    soma_distancias += d
+                    contagem_alcancaveis += 1
+                
+            if soma_distancias > 0:
+                proximidade = contagem_alcancaveis / soma_distancias
+                soma_proximidades += proximidade
+                nos_processados += 1
+
+        if nos_processados == 0:
+            return 0.0
+                
+        return soma_proximidades / nos_processados
+
+    # ====================================================================
+    #   Exportação para o GEPHI
+    # ====================================================================
     def export_to_gephi(self, path_arquivo):
         print(f"--- Exportando para Gephi: {path_arquivo} ---")
         try:
