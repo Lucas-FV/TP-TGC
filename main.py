@@ -1,118 +1,139 @@
 import csv
 import os
-from grafos import AdjacencyListGraph, AdjacencyMatrixGraph
+import sys
+from grafos import AdjacencyListGraph
 
-# Função auxiliar para carregar o grafo a partir do CSV
+# --- FUNÇÃO DE CARREGAMENTO (Mantida igual) ---
 def carregar_grafo(caminho_arquivo, indice_peso):
-    """
-    Lê um CSV, mapeia usuários para IDs numéricos e retorna o grafo montado.
-    :param caminho_arquivo: String com o path do arquivo
-    :param indice_peso: Qual coluna do CSV contém o peso (varia entre os arquivos)
-    :return: (grafo, mapa_nomes)
-    """
-    print(f"\n--- Carregando: {caminho_arquivo} ---")
-    
     if not os.path.exists(caminho_arquivo):
         print(f"ERRO: Arquivo não encontrado: {caminho_arquivo}")
-        return None, None
+        return None
 
+    # 1. Identificar vértices
     usuarios = set()
     with open(caminho_arquivo, 'r', encoding='utf-8') as f:
         leitor = csv.reader(f)
-        next(leitor) # Pular cabeçalho
+        next(leitor)
         for linha in leitor:
             if len(linha) >= 2:
-                # Coluna 0 é Origem, Coluna 1 é Destino
                 usuarios.add(linha[0])
                 usuarios.add(linha[1])
     
     lista_usuarios = sorted(list(usuarios))
     num_vertices = len(lista_usuarios)
-    print(f"Total de Vértices detectados: {num_vertices}")
-
-    # Criar Dicionário de Mapeamento: "Nome" -> ID (Int)
     mapa_nome_id = {nome: i for i, nome in enumerate(lista_usuarios)}
 
-    # 2. INSTANCIAR O GRAFO
-    # Usamos Lista de Adjacência pois é mais eficiente para milhares de usuários
+    # 2. Instanciar
     grafo = AdjacencyListGraph(num_vertices)
-    
-    # Opcional: Guardar os nomes dentro do objeto grafo para facilitar depois
     grafo.vertex_labels = lista_usuarios
 
-    # 3. SEGUNDA PASSADA: Adicionar as arestas
+    # 3. Preencher arestas
     with open(caminho_arquivo, 'r', encoding='utf-8') as f:
         leitor = csv.reader(f)
-        next(leitor) # Pular cabeçalho
+        next(leitor)
         for linha in leitor:
             try:
-                origem_nome = linha[0]
-                destino_nome = linha[1]
-                peso = float(linha[indice_peso]) # Pega o peso da coluna correta
-
-                u = mapa_nome_id[origem_nome]
-                v = mapa_nome_id[destino_nome]
-
+                u = mapa_nome_id[linha[0]]
+                v = mapa_nome_id[linha[1]]
+                peso = float(linha[indice_peso])
                 grafo.add_edge(u, v, peso)
-            except Exception as e:
-                # Ignora linhas mal formatadas
+            except:
                 continue
-
-    print(f"Grafo carregado com sucesso! Arestas processadas: {grafo.get_edge_count()}")
-    return grafo, mapa_nome_id
-
-def analisar_grafo(grafo, nome_grafo):
-    if not grafo: return
-
-    print(f"\nANÁLISE RÁPIDA: {nome_grafo}")
-    print(f"- Vértices: {grafo.get_vertex_count()}")
-    print(f"- Arestas: {grafo.get_edge_count()}")
     
-    # Exemplo de uso da API Obrigatória
-    if grafo.get_vertex_count() > 0:
-        # Pega o primeiro usuário (geralmente quem tem nome começando com número ou A)
-        id_teste = 0
-        nome_teste = grafo.vertex_labels[id_teste]
-        grau_saida = grafo.get_vertex_out_degree(id_teste)
-        grau_entrada = grafo.get_vertex_in_degree(id_teste)
-        
-        print(f"- Exemplo de Usuário: '{nome_teste}' (ID {id_teste})")
-        print(f"  - Grau de Entrada (recebeu interação): {grau_entrada}")
-        print(f"  - Grau de Saída (fez interação): {grau_saida}")
+    return grafo
 
-# --- BLOCO PRINCIPAL ---
-if __name__ == "__main__":
+# --- MENU DE MÉTRICAS (Sub-menu) ---
+def menu_metricas(grafo, nome_grafo):
+    while True:
+        print(f"\n==============================================")
+        print(f"GRAFO SELECIONADO: {nome_grafo}")
+        print(f"----------------------------------------------")
+        # Informações Básicas (Sempre mostradas)
+        print(f"  > Total Vértices: {grafo.get_vertex_count()}")
+        print(f"  > Total Arestas:  {grafo.get_edge_count()}")
+        print(f"==============================================")
+        print("Escolha uma métrica para calcular:")
+        print("1. Grau Médio Ponderado por Conectividade Efetiva")
+        print("2. Índice de Robustez por Redundância de Caminhos")
+        print("3. Coeficiente de Proximidade Estrutural Global")
+        print("4. Exportar para Gephi (.gexf)")
+        print("0. Voltar ao Menu Principal")
+        print("----------------------------------------------")
+        
+        opcao = input("Digite sua opção: ")
+
+        if opcao == '1':
+            print("\n--- Calculando Grau Médio Ponderado... ---")
+            # FUTURO: resultado = grafo.calcular_grau_medio_ponderado()
+            # print(f"Resultado: {resultado}")
+            print("(Esta métrica ainda será implementada na classe AbstractGraph)")
+            input("\nPressione Enter para continuar...")
+
+        elif opcao == '2':
+            print("\n--- Calculando Índice de Robustez... ---")
+            # FUTURO: resultado = grafo.calcular_indice_robustez()
+            # print(f"Resultado: {resultado}")
+            print("(Esta métrica ainda será implementada na classe AbstractGraph)")
+            input("\nPressione Enter para continuar...")
+
+        elif opcao == '3':
+            print("\n--- Calculando Coeficiente de Proximidade... ---")
+            # FUTURO: resultado = grafo.calcular_coeficiente_proximidade()
+            # print(f"Resultado: {resultado}")
+            print("(Esta métrica ainda será implementada na classe AbstractGraph)")
+            input("\nPressione Enter para continuar...")
+
+        elif opcao == '4':
+            nome_arquivo = f"gephi_export_{nome_grafo.split()[1]}.gexf"
+            grafo.export_to_gephi(nome_arquivo)
+            input("\nPressione Enter para continuar...")
+
+        elif opcao == '0':
+            break # Sai do loop de métricas e volta pro menu principal
+        else:
+            print("Opção inválida!")
+
+# --- MENU PRINCIPAL ---
+def main():
     pasta = "dados_coletados"
+    print("\n--- INICIALIZANDO SISTEMA ---")
+    print("Carregando grafos na memória, aguarde...")
+
+    # Carrega tudo de uma vez para não ter delay no menu
+    g1 = carregar_grafo(os.path.join(pasta, "grafo_1_comentarios.csv"), indice_peso=3)
+    g2 = carregar_grafo(os.path.join(pasta, "grafo_2_fechamentos.csv"), indice_peso=2)
+    g3 = carregar_grafo(os.path.join(pasta, "grafo_3_pr_reviews.csv"), indice_peso=3)
     
-    # ATENÇÃO: Os índices do peso mudam dependendo do arquivo gerado pelo coleta.py
-    # Grafo 1 (Comentários): origem, destino, tipo, PESO(3), numero
-    caminho_g1 = os.path.join(pasta, "grafo_1_comentarios.csv")
-    grafo1, _ = carregar_grafo(caminho_g1, indice_peso=3)
-    analisar_grafo(grafo1, "Grafo 1: Comentários")
+    if not g1 or not g2 or not g3:
+        print("ERRO CRÍTICO: Não foi possível carregar os arquivos CSV.")
+        print("Verifique se rodou o 'coleta.py' primeiro.")
+        return
 
-    # Grafo 2 (Fechamentos): origem, destino, PESO(2), numero
-    caminho_g2 = os.path.join(pasta, "grafo_2_fechamentos.csv")
-    grafo2, _ = carregar_grafo(caminho_g2, indice_peso=2)
-    analisar_grafo(grafo2, "Grafo 2: Fechamentos de Issue")
-
-    # Grafo 3 (Reviews): origem, destino, acao, PESO(3), numero
-    caminho_g3 = os.path.join(pasta, "grafo_3_pr_reviews.csv")
-    grafo3, _ = carregar_grafo(caminho_g3, indice_peso=3)
-    analisar_grafo(grafo3, "Grafo 3: Reviews e Merges")
-
-    # --- EXPORTAÇÃO PARA GEPHI (Requisito Obrigatório) ---
-    print("\n------------------------------------------------")
-    print("GERANDO ARQUIVOS PARA O GEPHI (.gexf)")
-    print("Estes arquivos devem ser abertos no software Gephi para gerar os diagramas.")
-    print("------------------------------------------------")
-
-    if grafo1:
-        grafo1.export_to_gephi("gephi_grafo_1_comentarios.gexf")
-    
-    if grafo2:
-        grafo2.export_to_gephi("gephi_grafo_2_fechamentos.gexf")
+    while True:
+        os.system('cls' if os.name == 'nt' else 'clear') # Limpa tela (opcional)
+        print(f"\n==============================================")
+        print(f"      ANÁLISE DE REDES - XCODEGEN")
+        print(f"==============================================")
+        print("Selecione o Grafo para trabalhar:")
+        print("1. Grafo 1: Comentários (Issues/PRs)")
+        print("2. Grafo 2: Fechamento de Issues")
+        print("3. Grafo 3: Reviews e Merges")
+        print("0. Sair")
+        print("----------------------------------------------")
         
-    if grafo3:
-        grafo3.export_to_gephi("gephi_grafo_3_reviews.gexf")
-    
-    print("\nProcesso finalizado com sucesso!")
+        escolha = input("Opção: ")
+
+        if escolha == '1':
+            menu_metricas(g1, "Grafo 1 (Comentários)")
+        elif escolha == '2':
+            menu_metricas(g2, "Grafo 2 (Fechamentos)")
+        elif escolha == '3':
+            menu_metricas(g3, "Grafo 3 (Reviews)")
+        elif escolha == '0':
+            print("Encerrando ferramenta. Até logo!")
+            sys.exit()
+        else:
+            print("Opção inválida, tente novamente.")
+
+if __name__ == "__main__":
+    main()
