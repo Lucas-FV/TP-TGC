@@ -236,7 +236,36 @@ class AdjacencyListGraph(AbstractGraph):
     #      escreva o método aqui na classe abstrata e implemente nas filhas
     #      ou deixe aqui se a lógica for genérica.
     # ====================================================================
+    def calcular_gmce(self):
+        n = self.num_vertices
+        if n == 0:
+            return 0.0
 
+        graus = []
+        for i in range(n):
+            graus.append(self.get_vertex_out_degree(i))
+
+        soma_total_metricas = 0.0
+
+        for u in range(n):
+            grau_u = graus[u]
+
+            if grau_u == 0:
+                continue
+
+            soma_graus_vizinhos = 0.0
+            
+            for v in range(n):
+                if self.has_edge(u, v):
+                    soma_graus_vizinhos += graus[v]
+
+            media_vizinhos = soma_graus_vizinhos / grau_u
+            valor_conectividade_u = grau_u * media_vizinhos
+            soma_total_metricas += valor_conectividade_u
+
+        gmce = soma_total_metricas / n
+        
+        return gmce
 
     # --- EXPORTAÇÃO GEPHI (OBRIGATÓRIO PELO ENUNCIADO) ---
     def export_to_gephi(self, path_arquivo):

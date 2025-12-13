@@ -63,15 +63,13 @@ def menu_metricas(grafo, nome_grafo):
         opcao = input("Digite sua opção: ")
 
         if opcao == '1':
-            print("\n--- Calculando Grau Médio Ponderado... ---")
-            # FUTURO: resultado = grafo.calcular_grau_medio_ponderado()
-            # print(f"Resultado: {resultado}")
-            print("(Esta métrica ainda será implementada na classe AbstractGraph)")
+            print("\n--- Calculando Grau Médio Ponderado (GMCE)... ---")
+            resultado = grafo.calcular_gmce()
+            print(f"Resultado GMCE: {resultado:.4f}")
             input("\nPressione Enter para continuar...")
 
         elif opcao == '2':
-            print("\n--- Calculando Índice de Robustez... ---")
-            # FUTURO: resultado = grafo.calcular_indice_robustez()
+            print("\n--- Calculando Índice de Robustez (IRRC)... ---")
             # print(f"Resultado: {resultado}")
             print("(Esta métrica ainda será implementada na classe AbstractGraph)")
             input("\nPressione Enter para continuar...")
