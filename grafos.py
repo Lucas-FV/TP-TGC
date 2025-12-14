@@ -366,6 +366,97 @@ class AdjacencyListGraph(AbstractGraph):
         return soma_proximidades / nos_processados
 
     # ====================================================================
+    #   Métrica NOVA: PageRank (Influência / Importância)
+    #   - Sem biblioteca de grafos
+    #   - Considera pesos nas arestas (normaliza por soma de pesos de saída)
+    # ====================================================================
+    def calcular_pagerank(self, damping=0.85, max_iter=100, tol=1e-6):
+        """
+        PageRank em grafo direcionado.
+        Interpretação: nós "importantes" são aqueles que recebem links (arestas)
+        de outros nós importantes.
+
+        - damping: fator de amortecimento (0.85 padrão)
+        - max_iter: máximo de iterações
+        - tol: tolerância de convergência (L1)
+        
+        Retorna: lista rank[n] com o PageRank de cada vértice.
+        """
+        n = self.num_vertices
+        if n == 0:
+            return []
+
+        # rank inicial uniforme
+        rank = [1.0 / n] * n
+
+        # pré-cálculo: soma dos pesos de saída de cada u
+        out_weight_sum = [0.0] * n
+        for u in range(n):
+            s = 0.0
+            for v, w in self.adj_list[u]:
+                # garante peso positivo (se seu dataset puder ter 0/negativo, trate aqui)
+                if w > 0:
+                    s += w
+            out_weight_sum[u] = s
+
+        base = (1.0 - damping) / n
+
+        for _ in range(max_iter):
+            new_rank = [base] * n
+
+            # soma do rank "pendurado" (dangling nodes: sem saída)
+            dangling_mass = 0.0
+            for u in range(n):
+                if out_weight_sum[u] == 0.0:
+                    dangling_mass += rank[u]
+
+            # distribui massa pendurada igualmente
+            if dangling_mass > 0.0:
+                add = damping * (dangling_mass / n)
+                for i in range(n):
+                    new_rank[i] += add
+
+            # distribui contribuições pelos links
+            for u in range(n):
+                su = out_weight_sum[u]
+                if su == 0.0:
+                    continue
+
+                ru = rank[u]
+                for v, w in self.adj_list[u]:
+                    if w <= 0:
+                        continue
+                    # transição ponderada
+                    new_rank[v] += damping * ru * (w / su)
+
+            # checa convergência (norma L1)
+            diff = 0.0
+            for i in range(n):
+                diff += abs(new_rank[i] - rank[i])
+
+            rank = new_rank
+            if diff < tol:
+                break
+
+        # normalização final (segurança numérica)
+        s = sum(rank)
+        if s > 0:
+            rank = [x / s for x in rank]
+        return rank
+
+    def top_pagerank(self, k=10, damping=0.85, max_iter=100, tol=1e-6):
+        """
+        Retorna top-k nós por PageRank com rótulo (se existir).
+        """
+        pr = self.calcular_pagerank(damping=damping, max_iter=max_iter, tol=tol)
+        pares = []
+        for i, val in enumerate(pr):
+            label = self.vertex_labels[i] if hasattr(self, 'vertex_labels') and i < len(self.vertex_labels) else str(i)
+            pares.append((i, label, val))
+        pares.sort(key=lambda x: x[2], reverse=True)
+        return pares[:k]
+
+    # ====================================================================
     #   Exportação para o GEPHI
     # ====================================================================
     def export_to_gephi(self, path_arquivo):
@@ -397,3 +488,5 @@ class AdjacencyListGraph(AbstractGraph):
             print("Exportação concluída.")
         except Exception as e:
             print(f"Erro exportar Gephi: {e}")
+
+            
