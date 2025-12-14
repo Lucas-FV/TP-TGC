@@ -232,7 +232,33 @@ class AdjacencyListGraph(AbstractGraph):
         return count_visited == self.num_vertices
     
     # ====================================================================
-    #      ### ÁREA PARA IMPLEMENTAR SUAS MÉTRICAS (ETAPA 3) ###
+       # --- Métrica 3: Taxa de Reciprocidade ---
+    def calcular_reciprocidade(self):
+        """
+        Calcula a taxa de reciprocidade do grafo direcionado.
+        Mede a proporção de relações bidirecionais (u -> v e v -> u)
+        em relação ao total de pares que possuem ao menos uma aresta.
+        """
+        pares_com_interacao = set()
+        pares_reciprocos = set()
+
+        for u in range(self.num_vertices):
+            for aresta in self.adj_list[u]:
+                v = aresta[0]
+
+                # Par não ordenado (u, v) para evitar duplicidade
+                par = tuple(sorted((u, v)))
+                pares_com_interacao.add(par)
+
+                # Verifica se existe a aresta inversa
+                if self.has_edge(v, u):
+                    pares_reciprocos.add(par)
+
+        if len(pares_com_interacao) == 0:
+            return 0.0
+
+        return len(pares_reciprocos) / len(pares_com_interacao)
+
     # ====================================================================
 
     # --- Métrica 1: Cálculo do Grau Médio (GMCE) ---
