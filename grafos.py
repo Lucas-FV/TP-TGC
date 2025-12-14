@@ -259,7 +259,22 @@ class AdjacencyListGraph(AbstractGraph):
 
         return len(pares_reciprocos) / len(pares_com_interacao)
 
-    # ====================================================================
+    #     # --- Métrica 4: Densidade da Rede ---
+    def calcular_densidade(self):
+        """
+        Calcula a densidade de um grafo direcionado.
+        Densidade = arestas_existentes / arestas_possíveis
+        """
+        n = self.num_vertices
+
+        if n <= 1:
+            return 0.0
+
+        arestas_existentes = self.get_edge_count()
+        arestas_possiveis = n * (n - 1)
+
+        return arestas_existentes / arestas_possiveis
+
 
     # --- Métrica 1: Cálculo do Grau Médio (GMCE) ---
     def calcular_gmce(self):
